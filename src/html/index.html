@@ -1,0 +1,82 @@
+<style>
+    .todo-checked {
+        text-decoration: line-through;
+    }
+</style>
+
+<h1>ToDo</h1>
+<h2 id="title">This is a sub heading</h2>
+<ul id="todos">
+    <li>Some data</li>
+</ul>
+<input type="text" id="todo-input" /> <button onclick="addTodo()" type="submit" id="todo-add-btn">Add Todo</button>
+
+<script>
+    fetch("/api/todos/").then(function(resp) {
+        resp.text().then(function(data){
+            var todos_data = JSON.parse(data);
+            console.log(todos_data);
+            document.getElementById("title").innerHTML = todos_data.name;
+
+            var todosDiv = document.getElementById("todos");
+            todosDiv.innerHTML = "";
+            var list_items = todos_data.data;
+            console.log(list_items);    
+            for(var i=0;i<list_items.length;i++) {
+                var liElement = document.createElement("li");
+                var checkboxElem = document.createElement("input");
+                checkboxElem.type = "checkbox";
+                checkboxElem.onclick = onChecked;
+                checkboxElem.checked = list_items[i].checked;
+                if(list_items[i].checked) {
+                    liElement.classList.add("todo-checked");
+                }
+                liElement.appendChild(checkboxElem);
+                var titleElem = document.createElement("span");
+                titleElem.innerHTML = list_items[i].title;
+                liElement.appendChild(titleElem);
+                todosDiv.appendChild(liElement);
+            }
+        });
+    });
+    
+    function onChecked() {
+        // this -> checkbox element
+        if(this.checked) {
+            // parent element of this is 
+            this.parentElement.classList.add("todo-checked");
+            console.log("Checked");
+        } else {
+            console.log("Not Checked");
+            this.parentElement.classList.remove("todo-checked");
+        }
+    }
+
+    function addTodo() {
+        // Get todo value from input box
+        var todoName = document.getElementById("todo-input").value;
+
+        // Send todo value to the server
+        // API URL /api/todos/add/
+        fetch("/api/todos/add?todoname="+todoName).then(function() {
+            var todosDiv = document.getElementById("todos");
+
+                var liElement = document.createElement("li");
+                var checkboxElem = document.createElement("input");
+                checkboxElem.type = "checkbox";
+                checkboxElem.onclick = onChecked;
+                checkboxElem.checked = false;
+                if(checkboxElem.checked) {
+                    liElement.classList.add("todo-checked");
+                }
+                liElement.appendChild(checkboxElem);
+                var titleElem = document.createElement("span");
+                titleElem.innerHTML = todoName;
+                liElement.appendChild(titleElem);
+                todosDiv.appendChild(liElement);
+        });
+    }
+    
+   
+
+</script>
